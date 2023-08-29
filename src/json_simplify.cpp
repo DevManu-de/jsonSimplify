@@ -45,6 +45,7 @@ std::string substring_squre_braces(const std::string &input) {
 
 std::map<std::string, std::string> json_simplify_array(const std::string &input, u_int64_t &offset) {
     std::string json = substring_squre_braces(input).substr(1);
+    offset += json.length();
 
     std::map<std::string, std::string> map {};
     int64_t index = 0;
