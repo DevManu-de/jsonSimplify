@@ -1,6 +1,7 @@
 #ifndef JSON_SIMPLIFY_HPP
 #define JSON_SIMPLIFY_HPP
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iostream>
