@@ -52,6 +52,41 @@ char next_nonspace_char(std::string input) {
     throw std::invalid_argument("Cannot parse: ");
 }
 
+bool is_next_valid_value(const std::string &json, const bool &in_string, std::string &output) {
+
+    std::string buffer {};
+
+    static const std::string illegal_characters {",}]"};
+
+    bool is_num = true;
+    bool is_escaped = false;
+    for (const char &c : json) {
+        if (c == '\\') {
+            is_escaped = !is_escaped;
+        } else if ((c == '"' && !is_escaped) || illegal_characters.find(c) != illegal_characters.npos && !in_string) {
+            break;
+        } else {
+            is_num = is_num && (isdigit(c) || c == '.');
+            buffer.append(1, c);
+        }
+    }
+
+    if (is_num || in_string) {
+        output = buffer;
+        return true;
+    }
+
+    static const std::string allowed_keywords[] = {"null", "true", "false"};
+
+    if (std::find(std::begin(allowed_keywords), std::end(allowed_keywords), buffer) != std::end(allowed_keywords)) {
+        output = buffer;
+        return true;
+    }
+
+    output = "";
+    return false;
+}
+
 std::map<std::string, std::string> json_simplify_array(const std::string &input, u_int64_t &offset) {
     std::string json = substring_squre_braces(input);
     offset += json.length() - 1;
@@ -71,10 +106,10 @@ std::map<std::string, std::string> json_simplify_array(const std::string &input,
         } else if (c == '"' && in_string && !is_escaped) {
             in_string = false;
         } else if (c == '\\') {
-            is_escaped = true;
+            is_escaped = !is_escaped;
         } else if (c == ',' && !is_escaped && !in_string) {
             if (next_nonspace_char(json.substr(i + 1)) == ']' || next_nonspace_char(json.substr(i + 1)) == ',') {
-                throw std::invalid_argument(std::string("Cannot parse: ") + c);
+                throw std::invalid_argument(std::string("Cannot parse: ") + c + "; " + json.substr(i-10, 20));
             }
             if (!value_buffer.empty()) {
                 map.insert({std::to_string(index), value_buffer});
@@ -83,6 +118,7 @@ std::map<std::string, std::string> json_simplify_array(const std::string &input,
             }
         } else if (in_string) {
             value_buffer.append(1, c);
+            is_escaped = false;
         } else if (c == '{' && !in_string) {
             for (const auto &[k, v] : json_simplify_object(input.substr(i), i)) {
                 map.insert({std::to_string(index) + "." + k, v});
@@ -94,8 +130,14 @@ std::map<std::string, std::string> json_simplify_array(const std::string &input,
             }
             ++index;
         } else {
-            // Check for valid values
-            value_buffer.append(1, c);
+            std::string tmp {};
+            if (is_next_valid_value(json.substr(i), in_string, tmp)) {
+                value_buffer.append(tmp);
+                i += tmp.length() - 1;
+            } else {
+                throw std::invalid_argument(std::string("Cannot parse: ") + c + "; " + json.substr(i-10, 20));
+            }
+            is_escaped = false;
         }
     }
 
@@ -131,10 +173,10 @@ std::map<std::string, std::string> json_simplify_object(const std::string &input
         } else if (c == ':' && !in_string) {
             is_value = true;
         } else if (c == '\\') {
-            is_escaped = true;
+            is_escaped = !is_escaped;
         } else if (c == ',' && !is_escaped && !in_string) {
             if (next_nonspace_char(json.substr(i + 1)) == '}' || next_nonspace_char(json.substr(i + 1)) == ',') {
-                throw std::invalid_argument(std::string("Cannot parse: ") + c);
+                throw std::invalid_argument(std::string("Cannot parse: ") + c + "; " + json.substr(i-10, 20));
             }
             if (!key_buffer.empty()) {
                 map.insert({key_buffer, value_buffer});
@@ -145,9 +187,16 @@ std::map<std::string, std::string> json_simplify_object(const std::string &input
             is_value = false;
         } else if (in_string && !is_value) {
             key_buffer.append(1, c);
+            is_escaped = false;
         } else if (is_value && c != '{' && c != '[') {
-            // Check for valid values
-            value_buffer.append(1, c);
+            std::string tmp {};
+            if (is_next_valid_value(json.substr(i), in_string, tmp)) {
+                value_buffer.append(tmp);
+                i += tmp.length() - 1;
+            } else {
+                throw std::invalid_argument(std::string("Cannot parse: ") + c + "; " + json.substr(i-10, 20));
+            }
+            is_escaped = false;
         } else if (is_value) {
             if (c == '{') {
                 for (const auto &[k, v] : json_simplify_object(input.substr(i), i)) {
@@ -161,7 +210,7 @@ std::map<std::string, std::string> json_simplify_object(const std::string &input
             key_buffer.clear();
             is_value = false;
         } else {
-            throw std::invalid_argument(std::string("Cannot parse: ") + c);
+            throw std::invalid_argument(std::string("Cannot parse: ") + c + "; " + json.substr(i-10, 20));
         }
     }
 
@@ -185,20 +234,20 @@ std::map<std::string, std::string> json_simplify::json_simplify(const std::strin
             stack.push_back(c);
         } else if ((c == '}' || c == ']') && !is_escaped) {
             if (stack.size() <= 0) {
-                throw std::invalid_argument("Mismatching braces");
+                throw std::invalid_argument("More braces are closed than opened");
             } else if (c == '}' && stack.back() == '{') {
                 stack.pop_back();
             } else if (c == '}' && stack.back() == '[') {
-                throw std::invalid_argument("Mismatching braces");
+                throw std::invalid_argument("Mismatching braces, expected ] but got }");
             } else if (c == ']' && stack.back() == '[') {
                 stack.pop_back();
             } else if (c == ']' && stack.back() == '{') {
-                throw std::invalid_argument("Mismatching braces");
+                throw std::invalid_argument("Mismatching braces, expected } but got ]");
             }
         }
     }
     if (!stack.empty()) {
-        throw std::invalid_argument("Cannot parse");
+        throw std::invalid_argument("Not all braces are closed");
     }
 
     for (const char &c : input) {
