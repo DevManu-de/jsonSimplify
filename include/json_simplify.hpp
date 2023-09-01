@@ -16,6 +16,8 @@ class json_value;
 class json_object;
 class json_array;
 
+enum class json_element_type;
+
 class json_invalid;
 class json_unsupported_function;
 
@@ -32,14 +34,10 @@ class json {
     static bool is_next_valid_value(const std::string &json, const bool &in_string, std::string &output, u_int64_t &skip);
     static char resolve_escape_characters(const char &c);
 
-    template<typename T1, typename T2, typename T3, typename T4>
-    static json_invalid generate_error_message(const T1 &&message, const T2 &&json, const T3 &&err_pos, const T4 &&spacing);
     static json_invalid generate_error_message(const std::string &message, const std::string &json, const u_int64_t &err_pos, const u_int64_t &spacing);
 
 protected:
     json() = default;
-    template<typename T1, typename T2>
-    static json_unsupported_function generate_unsupported_function(T1 &&fn_name, T2 &&class_name);
     static json_unsupported_function generate_unsupported_function(std::string fn_name, std::string class_name);
 
 public:
@@ -51,6 +49,7 @@ public:
     virtual json *at(std::string) = 0;
     virtual json *at(u_int64_t) = 0;
     virtual std::map<std::string, std::string> to_map() const noexcept = 0;
+    virtual const json_element_type get_type() const noexcept = 0;
     virtual bool is_key_truth() const noexcept = 0;
 
     virtual ~json() noexcept = default;
@@ -71,6 +70,7 @@ public:
     json *at(u_int64_t);
     std::map<std::string, std::string> to_map() const noexcept;
 
+    const json_element_type get_type() const noexcept;
     const std::string &get_value() const noexcept;
 
     ~json_value() noexcept = default;
@@ -93,6 +93,7 @@ public:
     json *at(u_int64_t);
     std::map<std::string, std::string> to_map() const noexcept;
 
+    const json_element_type get_type() const noexcept;
     const std::map<std::string, json*> &get_map() const noexcept;
 
     ~json_object() noexcept;
@@ -114,9 +115,16 @@ public:
     json *at(u_int64_t);
     std::map<std::string, std::string> to_map() const noexcept;
 
+    const json_element_type get_type() const noexcept;
     const std::vector<json*> &get_list() const noexcept;
 
     ~json_array() noexcept;
+};
+
+enum class json_element_type {
+    JSON_VALUE,
+    JSON_OBJECT,
+    JSON_ARRAY
 };
 
 class json_invalid : public std::runtime_error {
