@@ -1,21 +1,8 @@
 #include "json_simplify.hpp"
 
-std::map<std::string, std::string> json_simplify_object(const std::string &input, u_int64_t &offset);
-std::map<std::string, std::string> json_simplify_array(const std::string &input, u_int64_t &offset);
+using namespace json_simplify;
 
-std::string match_braces_pair(const char &brace_open, const char &brace_close, const std::string &input);
-std::string substring_curly_braces(const std::string &input);
-std::string substring_squre_braces(const std::string &input);
-
-char next_nonspace_char(std::string input);
-bool is_next_valid_value(const std::string &json, const bool &in_string, std::string &output, u_int64_t &skip);
-char resolve_escape_characters(const char &c);
-
-template<typename T1, typename T2, typename T3, typename T4>
-json_simplify::invalid_json generate_error_message(const T1 &&message, const T2 &&json, const T3 &&err_pos, const T4 &&spacing);
-json_simplify::invalid_json generate_error_message(const std::string &message, const std::string &json, const u_int64_t &err_pos, const u_int64_t &spacing);
-
-std::string match_braces_pair(const char &brace_open, const char &brace_close, const std::string &input) {
+std::string json::match_braces_pair(const char &brace_open, const char &brace_close, const std::string &input) {
 
     int level {0};
     bool collect = false;
@@ -50,17 +37,17 @@ std::string match_braces_pair(const char &brace_open, const char &brace_close, c
     return input.substr(input.find(brace_open), length);
 }
 
-std::string substring_curly_braces(const std::string &input) {
+std::string json::substring_curly_braces(const std::string &input) {
 
-    return match_braces_pair('{', '}', input);
+    return json::match_braces_pair('{', '}', input);
 }
 
-std::string substring_squre_braces(const std::string &input) {
+std::string json::substring_squre_braces(const std::string &input) {
 
-    return match_braces_pair('[', ']', input);
+    return json::match_braces_pair('[', ']', input);
 }
 
-char next_nonspace_char(std::string input) {
+char json::next_nonspace_char(std::string input) {
     for (const char &c : input) {
         if (!isspace(c)) {
             return c;
@@ -69,7 +56,7 @@ char next_nonspace_char(std::string input) {
     throw std::invalid_argument("Cannot parse: ");
 }
 
-bool is_next_valid_value(const std::string &json, const bool &in_string, std::string &output, u_int64_t &skip) {
+bool json::is_next_valid_value(const std::string &json, const bool &in_string, std::string &output, u_int64_t &skip) {
 
     std::string buffer {};
 
@@ -111,7 +98,7 @@ bool is_next_valid_value(const std::string &json, const bool &in_string, std::st
     return false;
 }
 
-char resolve_escape_characters(const char &c) {
+char json::resolve_escape_characters(const char &c) {
 
     switch (c) {
     case '\\':
@@ -133,28 +120,34 @@ char resolve_escape_characters(const char &c) {
 }
 
 template<typename T1, typename T2, typename T3, typename T4>
-json_simplify::invalid_json generate_error_message(const T1 &&message, const T2 &&json, const T3 &&err_pos, const T4 &&spacing) {
+json_simplify::json_invalid json::generate_error_message(const T1 &&message, const T2 &&json, const T3 &&err_pos, const T4 &&spacing) {
     return generate_error_message(message, json, err_pos, spacing);
 }
 
-json_simplify::invalid_json generate_error_message(const std::string &message, const std::string &json, const u_int64_t &err_pos, const u_int64_t &spacing) {
+json_simplify::json_invalid json::generate_error_message(const std::string &message, const std::string &json, const u_int64_t &err_pos, const u_int64_t &spacing) {
     u_int64_t err_start = err_pos - std::min(spacing, err_pos);
     u_int64_t err_len = std::min(err_start + spacing + std::min(json.length() - err_pos, spacing), spacing * 2);
     std::string snippet = json.substr(err_start, err_len);
     std::string msg = message + json[err_pos] + "; ";
 
-    //std::string buffer {};
-    //buffer.append(spacing - std::min(spacing, err_pos), ' ').append(json.substr(err_start, err_len));
-
-    return json_simplify::invalid_json(msg, snippet, err_pos - err_start, msg + snippet);
+    return json_simplify::json_invalid(msg, snippet, err_pos - err_start, msg + snippet);
 }
 
-std::map<std::string, std::string> json_simplify_array(const std::string &input, u_int64_t &offset) {
+template<typename T1, typename T2>
+json_unsupported_function json::generate_unsupported_function(T1 &&fn_name, T2 &&class_name) {
+    return generate_unsupported_function(fn_name, class_name);
+}
+json_unsupported_function json::generate_unsupported_function(std::string fn_name, std::string class_name) {
+    return json_unsupported_function(std::string("Function \"") + fn_name + "\" is not supported for class \"" + class_name + "\"");
+}
+
+json_array *json::json_simplify_array(const std::string &input, u_int64_t &offset) {
     std::string json = substring_squre_braces(input);
     offset += json.length() - 1;
 
-    std::map<std::string, std::string> map {};
-    int64_t index = 0;
+    //std::map<std::string, std::string> map {};
+    json_array *array = new json_array();
+    //int64_t index = 0;
     bool is_escaped = false;
     bool in_string = false;
     std::string value_buffer {};
@@ -178,26 +171,29 @@ std::map<std::string, std::string> json_simplify_array(const std::string &input,
                 throw generate_error_message("Cannot parse: ", json, i, 10);
             }
             if (is_value_truth) {
-                map.insert({std::to_string(index), value_buffer});
+                array->insert(new json_value(value_buffer));
+                //map.insert({std::to_string(index), value_buffer});
                 value_buffer.clear();
-                ++index;
+                //++index;
             }
             is_value_sealed = false;
         } else if (in_string && !is_value_sealed) {
             value_buffer.append(1, (is_escaped ? resolve_escape_characters(c) : c));
             is_escaped = false;
         } else if (c == '{' && !in_string && !is_value_sealed) {
-            for (const auto &[k, v] : json_simplify_object(input.substr(i), i)) {
-                map.insert({std::to_string(index) + "." + k, v});
-            }
-            ++index;
+            array->insert(json_simplify_object(input.substr(i), i));
+            //for (const auto &[k, v] : json_simplify_object(input.substr(i), i)) {
+            //    map.insert({std::to_string(index) + "." + k, v});
+            //}
+            //++index;
             is_escaped = false;
             is_value_sealed = true;
         } else if (c == '[' && !in_string && !is_value_sealed) {
-            for (const auto &[k, v] : json_simplify_array(json.substr(i), i)) {
-                map.insert({std::to_string(index) + "." + k, v});
-            }
-            ++index;
+            array->insert(json_simplify_array(json.substr(i), i));
+            //for (const auto &[k, v] : json_simplify_array(json.substr(i), i)) {
+            //    map.insert({std::to_string(index) + "." + k, v});
+            //}
+            //++index;
             is_escaped = false;
             is_value_sealed = true;
             is_value_truth = false;
@@ -215,33 +211,34 @@ std::map<std::string, std::string> json_simplify_array(const std::string &input,
         }
     }
 
-    if (!value_buffer.empty()) {
-        map.insert({std::to_string(index), value_buffer});
-        value_buffer.clear();
+    if (is_value_truth) {
+        array->insert(new json_value(value_buffer));
+        //map.insert({std::to_string(index), value_buffer});
+        //value_buffer.clear();
     }
 
-    return map;
+    return array;
 
 }
 
-std::map<std::string, std::string> json_simplify_object(const std::string &input, u_int64_t &offset) {
+json_object *json::json_simplify_object(const std::string &input, u_int64_t &offset) {
 
-    std::string json = substring_curly_braces(input);
-    offset += json.length() - 1;
+    std::string json_string = substring_curly_braces(input);
+    offset += json_string.length() - 1;
 
-    std::map<std::string, std::string> map {};
+    //std::map<std::string, std::string> map {};
+    json_object *object = new json_object();
     bool is_escaped = false;
     bool in_string = false;
     bool is_value = false;
     std::string key_buffer {};
     bool is_key_sealed = false;
+    bool is_key_truth = false;
     std::string value_buffer {};
-    // optional could be a solution
     bool is_value_sealed = false;
-    bool is_value_truth = false;
 
-    for (u_int64_t i = 1; i < json.length() - 1; ++i) {
-        const char c = json[i];
+    for (u_int64_t i = 1; i < json_string.length() - 1; ++i) {
+        const char c = json_string[i];
         if (isspace(c) && !in_string) {
             continue;
         } else if (c == '"' && !in_string && !is_escaped && ((!is_value && !is_key_sealed) || is_value && !is_value_sealed)) {
@@ -252,7 +249,7 @@ std::map<std::string, std::string> json_simplify_object(const std::string &input
                 is_key_sealed = true;
             } else {
                 is_value_sealed = true;
-                is_value_truth = true;
+                is_key_truth = true;
                 is_value = false;
             }
         } else if (c == ':' && !in_string) {
@@ -260,19 +257,21 @@ std::map<std::string, std::string> json_simplify_object(const std::string &input
         } else if (c == '\\' && !is_escaped) {
             is_escaped = true;
         } else if (c == ',' && !is_escaped && !in_string) {
-            if (next_nonspace_char(json.substr(i + 1)) == '}' || next_nonspace_char(json.substr(i + 1)) == ',') {
-                throw generate_error_message("Cannot parse: ", json, i, 10);
+            if (next_nonspace_char(json_string.substr(i + 1)) == '}' || next_nonspace_char(json_string.substr(i + 1)) == ',') {
+                throw generate_error_message("Cannot parse: ", json_string, i, 10);
             }
             if (!is_key_sealed || !is_value_sealed) {
-                throw generate_error_message("Cannot parse: ", json, i, 10);
-            } else if (is_value_truth /* && !value_buffer.empty()*/) {
-                map.insert({key_buffer, value_buffer});
+                throw generate_error_message("Cannot parse: ", json_string, i, 10);
+            } else if (is_key_truth) {
+                object->insert({key_buffer, new json_value(value_buffer)});
+                //json_element.insert({key_buffer, value_buffer});
+                //map.insert({key_buffer, value_buffer});
             }
             key_buffer.clear();
             value_buffer.clear();
             is_key_sealed = false;
             is_value_sealed = false;
-            is_value_truth = false;
+            is_key_truth = false;
 
             is_value = false;
         } else if (in_string && !is_value && !is_key_sealed) {
@@ -281,44 +280,54 @@ std::map<std::string, std::string> json_simplify_object(const std::string &input
         } else if (is_value && !is_value_sealed && c != '{' && c != '[') {
             std::string tmp {};
             u_int64_t skip {0};
-            if (is_next_valid_value(json.substr(i), in_string, tmp, skip)) {
+            if (is_next_valid_value(json_string.substr(i), in_string, tmp, skip)) {
                 value_buffer.append(tmp);
                 i += skip - 1;
                 is_value_sealed = true;
-                is_value_truth = true;
+                is_key_truth = true;
             } else {
-                throw generate_error_message("Cannot parse: ", json, i, 10);
+                throw generate_error_message("Cannot parse: ", json_string, i, 10);
             }
             is_escaped = false;
         } else if (is_value) {
+            json *j = nullptr;
             if (c == '{') {
-                for (const auto &[k, v] : json_simplify_object(json.substr(i), i)) {
-                    map.insert({key_buffer + "." + k, v});
-                }
+                j = json_simplify_object(json_string.substr(i), i);
+                //for (const auto &[k, v] : json_simplify_object(json.substr(i), i)) {
+                //    map.insert({key_buffer + "." + k, v});
+                //}
             } else if (c == '[') {
-                for (const auto &[k, v] : json_simplify_array(json.substr(i), i)) {
-                    map.insert({key_buffer + "." + k, v});
-                }
+                j = json_simplify_array(json_string.substr(i), i);
+                //for (const auto &[k, v] : json_simplify_array(json.substr(i), i)) {
+                //    map.insert({key_buffer + "." + k, v});
+                //}
             }
+            object->insert({key_buffer, j});
             is_value = false;
             is_escaped = false;
             is_value_sealed = true;
-            is_value_truth = false;
+            is_key_truth = false;
         } else {
-            throw generate_error_message("Cannot parse: ", json, i, 10);
+            throw generate_error_message("Cannot parse: ", json_string, i, 10);
         }
     }
 
-    if (!key_buffer.empty() && !value_buffer.empty()) {
-        map.insert({key_buffer, value_buffer});
+    if (is_key_truth) {
+        object->insert({key_buffer, new json_value(value_buffer)});
+        //map.insert({key_buffer, value_buffer});
         key_buffer.clear();
         value_buffer.clear();
     }
 
-    return map;
+    return object;
 }
 
-std::map<std::string, std::string> json_simplify::json_simplify(const std::string &input) {
+template<typename T>
+json *json::json_simplify(const T &&input) {
+    return json_simplify(input);
+}
+
+json *json::json_simplify(const std::string &input) {
 
     std::vector<char> stack {};
     bool is_escaped = false;
@@ -361,15 +370,143 @@ std::map<std::string, std::string> json_simplify::json_simplify(const std::strin
     }
 
     if (input.empty()) {
-        return std::map<std::string, std::string>();
+        return new json_value("");
+        //return std::map<std::string, std::string>();
     }
     throw std::invalid_argument(std::string("Cannot parse: ") + input);
 }
 
-json_simplify::invalid_json::invalid_json(std::string msg, std::string snippet, u_int64_t pos, std::string what)
+
+// JSON_VALUE
+json_value::json_value(std::string value) noexcept : value(value) {
+
+}
+
+std::string json_value::at() {
+    return this->value;
+}
+json *json_value::at(std::string) {
+    throw json::generate_unsupported_function("at(string)", "json_value");
+}
+json *json_value::at(u_int64_t) {
+    throw json::generate_unsupported_function("at(u_int64_t)", "json_value");
+}
+std::map<std::string, std::string> json_value::to_map() const noexcept {
+    return std::map<std::string, std::string>{{"", this->value}};
+}
+
+const std::string &json_value::get_value() const noexcept {
+    return this->get_value();
+}
+
+bool json_value::is_key_truth() const noexcept {
+    return false;
+}
+
+// JSON_OBJECT
+json_object::json_object() noexcept {
+
+}
+void json_object::insert(std::pair<std::string, json*> p) noexcept {
+    this->get_map().insert(p);
+}
+std::string json_object::at() {
+    throw json::generate_unsupported_function("at()", "json_object");
+}
+json *json_object::at(std::string key) {
+    return this->map.at(key);
+}
+json *json_object::at(u_int64_t) {
+    throw json::generate_unsupported_function("at(u_int64_t)", "json_object");
+}
+std::map<std::string, std::string> json_object::to_map() const noexcept {
+    std::map<std::string, std::string> map {};
+
+    for (const auto &[k1, v1] : this->get_map()) {
+        for (const auto &[k2, v2] : v1->to_map()) {
+            map.insert({k1 + (v1->is_key_truth() ? "." : "") + k2, v2});
+        }
+    }
+
+    return map;
+}
+
+std::map<std::string, json*> &json_object::get_map() noexcept {
+    return this->map;
+}
+
+const std::map<std::string, json*> &json_object::get_map() const noexcept {
+    return this->map;
+}
+
+bool json_object::is_key_truth() const noexcept {
+    return true;
+}
+
+json_object::~json_object() noexcept {
+    for (const auto &[k, v] : this->get_map()) {
+        delete v;
+    }
+}
+
+// JSON_ARRAY
+json_array::json_array() noexcept {
+
+}
+void json_array::insert(json *j) noexcept {
+    this->get_list().push_back(j);
+}
+
+std::string json_array::at() {
+    throw json::generate_unsupported_function("at()", "json_object");
+}
+json *json_array::at(std::string key) {
+    throw json::generate_unsupported_function("at(u_int64_t)", "json_value");
+}
+json *json_array::at(u_int64_t index) {
+    return this->list.at(index);
+}
+std::map<std::string, std::string> json_array::to_map() const noexcept {
+    std::map<std::string, std::string> map {};
+
+    u_int64_t index {0};
+    for (auto v : this->get_list()) {
+        for (const auto &[k, v2] : v->to_map()) {
+            map.insert({std::to_string(index++) + (v->is_key_truth() ? "." : "") + k, v2});
+        }
+    }
+
+    return map;
+}
+
+std::vector<json*> &json_array::get_list() noexcept {
+    return this->list;
+}
+
+const std::vector<json*> &json_array::get_list() const noexcept {
+    return this->list;
+}
+
+bool json_array::is_key_truth() const noexcept {
+    return true;
+}
+
+json_array::~json_array() noexcept {
+    for (const auto &v : this->get_list()) {
+        delete v;
+    }
+}
+
+// JSON_INVALID
+json_invalid::json_invalid(std::string msg, std::string snippet, u_int64_t pos, std::string what)
     : std::runtime_error(what), msg(msg), snippet(snippet), pos(pos) {
 
 }
-std::string json_simplify::invalid_json::format() const {
+std::string json_invalid::format() const {
     return std::string().append(this->what()).append(1, '\n').append(this->msg.length(), ' ').append(this->pos, '~').append(1, '^');
+}
+
+// JSON_UNSUPPORTED_FUNCTION
+json_unsupported_function::json_unsupported_function(std::string msg) : std::runtime_error(msg) {
+
 }
