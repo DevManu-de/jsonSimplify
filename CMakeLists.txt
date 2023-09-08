@@ -13,3 +13,5 @@ add_library(jsonSimplify STATIC
 )
 
 target_compile_definitions(jsonSimplify PRIVATE JSONSIMPLIFY_LIBRARY)
+
+add_subdirectory(tests)
