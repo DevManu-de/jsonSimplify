@@ -6,7 +6,7 @@
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[], __attribute__((unused)) char *envp[]) {
 
-    std::ifstream file{"test01.txt"};
+    std::ifstream file{"cases/test01.txt"};
 
     if (!file.is_open()) {
         std::cerr << "Failed to open file" << std::endl;
