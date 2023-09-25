@@ -12,6 +12,8 @@
 
 namespace json_simplify {
 
+class json_view;
+
 class json_value;
 class json_object;
 class json_array;
@@ -50,14 +52,34 @@ public:
     json(const std::string json);
 
     virtual const std::string at() const;
-    virtual const json *at(std::string) const;
-    virtual const json *at(u_int64_t) const;
+    virtual const json_view at(std::string) const;
+    virtual const json_view at(u_int64_t) const;
     virtual std::map<std::string, std::string> to_map() const;
     virtual bool is_key_truth() const;
 
     enum json_element_type get_type() const noexcept;
 
     virtual ~json() noexcept;
+};
+
+class json_view {
+
+private:
+    const json *jsn;
+
+public:
+    json_view(json *jsn);
+
+    virtual const std::string at() const;
+    virtual const json_view at(std::string) const;
+    virtual const json_view at(u_int64_t) const;
+    virtual std::map<std::string, std::string> to_map() const;
+    virtual bool is_key_truth() const;
+
+    enum json_element_type get_type() const noexcept;
+
+    virtual ~json_view() = default;
+
 };
 
 class json_value : public json {
@@ -71,8 +93,8 @@ public:
     json_value(std::string value) noexcept;
 
     const std::string at() const;
-    const json *at(std::string) const;
-    const json *at(u_int64_t) const;
+    const json_view at(std::string) const;
+    const json_view at(u_int64_t) const;
     std::map<std::string, std::string> to_map() const noexcept;
 
     const std::string &get_value() const noexcept;
@@ -94,8 +116,8 @@ public:
     json_object() noexcept;
     void insert(std::pair<std::string, json*>) noexcept;
     const std::string at() const;
-    const json *at(std::string) const;
-    const json *at(u_int64_t) const;
+    const json_view at(std::string) const;
+    const json_view at(u_int64_t) const;
     std::map<std::string, std::string> to_map() const noexcept;
 
     const std::map<std::string, json*> &get_map() const noexcept;
@@ -116,8 +138,8 @@ public:
     json_array() noexcept;
     void insert(json*) noexcept;
     const std::string at() const;
-    const json *at(std::string) const;
-    const json *at(u_int64_t) const;
+    const json_view at(std::string) const;
+    const json_view at(u_int64_t) const;
     std::map<std::string, std::string> to_map() const noexcept;
 
     const std::vector<json*> &get_list() const noexcept;

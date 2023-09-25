@@ -33,5 +33,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
         std::cerr << e.format() << std::endl;
     }
 
+    std::cout << parsed.at("glossary").at("GlossDiv").at("GlossList").at("GlossEntry").at("GlossDef").at("para").at() << std::endl;
+
     return 0;
 }

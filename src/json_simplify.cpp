@@ -336,7 +336,7 @@ json *json::json_simplify(const std::string &input) {
 }
 
 
-//JSON
+// JSON
 json::json(const enum json_element_type json_element_type) : element_type(json_element_type) {
 
 }
@@ -351,13 +351,13 @@ const std::string json::at() const {
     }
     return this->jsn->at();
 }
-const json *json::at(std::string value) const {
+const json_view json::at(std::string value) const {
     if (this->jsn == nullptr) {
         throw json_unsupported_function("jsn = nullptr");
     }
     return this->jsn->at(value);
 }
-const json *json::at(u_int64_t index) const {
+const json_view json::at(u_int64_t index) const {
     if (this->jsn == nullptr) {
         throw json_unsupported_function("jsn = nullptr");
     }
@@ -385,6 +385,48 @@ json::~json() noexcept {
     delete this->jsn;
 }
 
+// JSON_VIEW
+json_view::json_view(json *jsn) : jsn(jsn) {
+
+}
+
+const std::string json_view::at() const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->at();
+}
+const json_view json_view::at(std::string value) const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->at(value);
+}
+const json_view json_view::at(u_int64_t index) const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->at(index);
+}
+std::map<std::string, std::string> json_view::to_map() const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->to_map();
+}
+
+enum json_element_type json_view::get_type() const noexcept {
+    return this->jsn->get_type();
+}
+
+bool json_view::is_key_truth() const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->is_key_truth();
+}
+
+
 // JSON_VALUE
 json_value::json_value(std::string value) noexcept : json(json_element_type::JSON_VALUE), value(value) {
 
@@ -393,10 +435,10 @@ json_value::json_value(std::string value) noexcept : json(json_element_type::JSO
 const std::string json_value::at() const {
     return this->value;
 }
-const json *json_value::at(std::string) const {
+const json_view json_value::at(std::string) const {
     throw json::generate_unsupported_function("at(string)", "json_value");
 }
-const json *json_value::at(u_int64_t) const {
+const json_view json_value::at(u_int64_t) const {
     throw json::generate_unsupported_function("at(u_int64_t)", "json_value");
 }
 std::map<std::string, std::string> json_value::to_map() const noexcept {
@@ -421,10 +463,10 @@ void json_object::insert(std::pair<std::string, json*> p) noexcept {
 const std::string json_object::at() const {
     throw json::generate_unsupported_function("at()", "json_object");
 }
-const json *json_object::at(std::string key) const {
+const json_view json_object::at(std::string key) const {
     return this->map.at(key);
 }
-const json *json_object::at(u_int64_t) const {
+const json_view json_object::at(u_int64_t) const {
     throw json::generate_unsupported_function("at(u_int64_t)", "json_object");
 }
 std::map<std::string, std::string> json_object::to_map() const noexcept {
@@ -468,10 +510,10 @@ void json_array::insert(json *j) noexcept {
 const std::string json_array::at() const {
     throw json::generate_unsupported_function("at()", "json_array");
 }
-const json *json_array::at(std::string key) const {
+const json_view json_array::at(std::string key) const {
     throw json::generate_unsupported_function("at(u_int64_t)", "json_array");
 }
-const json *json_array::at(u_int64_t index) const {
+const json_view json_array::at(u_int64_t index) const {
     return this->list.at(index);
 }
 std::map<std::string, std::string> json_array::to_map() const noexcept {
