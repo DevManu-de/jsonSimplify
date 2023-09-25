@@ -8,8 +8,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include)
 
 add_library(jsonSimplify STATIC
+  src/json.cpp
+  src/json_array.cpp
+  src/json_element.cpp
+  src/json_object.cpp
   src/json_simplify.cpp
+  src/json_value.cpp
+
   include/json_simplify.hpp
+  include/json.hpp
+  include/json_element.hpp
+  include/json_value.hpp
+  include/json_object.hpp
+  include/json_array.hpp
+
 )
 
 target_compile_definitions(jsonSimplify PRIVATE JSONSIMPLIFY_LIBRARY)

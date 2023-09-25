@@ -2,7 +2,7 @@
 
 using namespace json_simplify;
 
-std::string json::match_braces_pair(const char &brace_open, const char &brace_close, const std::string &input) {
+std::string json_simplify::match_braces_pair(const char &brace_open, const char &brace_close, const std::string &input) {
 
     int level {0};
     bool collect = false;
@@ -37,17 +37,17 @@ std::string json::match_braces_pair(const char &brace_open, const char &brace_cl
     return input.substr(input.find(brace_open), length);
 }
 
-std::string json::substring_curly_braces(const std::string &input) {
+std::string json_simplify::substring_curly_braces(const std::string &input) {
 
-    return json::match_braces_pair('{', '}', input);
+    return json_simplify::match_braces_pair('{', '}', input);
 }
 
-std::string json::substring_squre_braces(const std::string &input) {
+std::string json_simplify::substring_squre_braces(const std::string &input) {
 
-    return json::match_braces_pair('[', ']', input);
+    return json_simplify::match_braces_pair('[', ']', input);
 }
 
-char json::next_nonspace_char(std::string input) {
+char json_simplify::next_nonspace_char(std::string input) {
     for (const char &c : input) {
         if (!isspace(c)) {
             return c;
@@ -56,7 +56,7 @@ char json::next_nonspace_char(std::string input) {
     throw std::invalid_argument("Cannot parse: ");
 }
 
-bool json::is_next_valid_value(const std::string &json, const bool &in_string, std::string &output, u_int64_t &skip) {
+bool json_simplify::is_next_valid_value(const std::string &json, const bool &in_string, std::string &output, u_int64_t &skip) {
 
     std::string buffer {};
 
@@ -98,7 +98,7 @@ bool json::is_next_valid_value(const std::string &json, const bool &in_string, s
     return false;
 }
 
-char json::resolve_escape_characters(const char &c) {
+char json_simplify::resolve_escape_characters(const char &c) {
 
     switch (c) {
     case '\\':
@@ -119,7 +119,7 @@ char json::resolve_escape_characters(const char &c) {
     }
 }
 
-json_simplify::json_invalid json::generate_error_message(const std::string &message, const std::string &json, const u_int64_t &err_pos, const u_int64_t &spacing) {
+json_simplify::json_invalid json_simplify::generate_error_message(const std::string &message, const std::string &json, const u_int64_t &err_pos, const u_int64_t &spacing) {
     u_int64_t err_start = err_pos - std::min(spacing, err_pos);
     u_int64_t err_len = std::min(err_start + spacing + std::min(json.length() - err_pos, spacing), spacing * 2);
     std::string snippet = json.substr(err_start, err_len);
@@ -128,11 +128,11 @@ json_simplify::json_invalid json::generate_error_message(const std::string &mess
     return json_simplify::json_invalid(msg, snippet, err_pos - err_start, msg + snippet);
 }
 
-json_unsupported_function json::generate_unsupported_function(std::string fn_name, std::string class_name) {
+json_unsupported_function json_simplify::generate_unsupported_function(std::string fn_name, std::string class_name) {
     return json_unsupported_function(std::string("Function \"") + fn_name + "\" is not supported for class \"" + class_name + "\"");
 }
 
-json_array *json::json_simplify_array(const std::string &input, u_int64_t &offset) {
+json_array *json_simplify::json_simplify_array(const std::string &input, u_int64_t &offset) {
     std::string json = substring_squre_braces(input);
     offset += json.length() - 1;
 
@@ -198,7 +198,7 @@ json_array *json::json_simplify_array(const std::string &input, u_int64_t &offse
 
 }
 
-json_object *json::json_simplify_object(const std::string &input, u_int64_t &offset) {
+json_object *json_simplify::json_simplify_object(const std::string &input, u_int64_t &offset) {
 
     std::string json_string = substring_curly_braces(input);
     offset += json_string.length() - 1;
@@ -264,7 +264,7 @@ json_object *json::json_simplify_object(const std::string &input, u_int64_t &off
             }
             is_escaped = false;
         } else if (is_value) {
-            json *j = nullptr;
+            json_element *j = nullptr;
             if (c == '{') {
                 j = json_simplify_object(json_string.substr(i), i);
             } else if (c == '[') {
@@ -287,7 +287,7 @@ json_object *json::json_simplify_object(const std::string &input, u_int64_t &off
     return object;
 }
 
-json *json::json_simplify(const std::string &input) {
+json_element *json_simplify::json_simplify(const std::string &input) {
 
     std::vector<char> stack {};
     bool is_escaped = false;
@@ -335,217 +335,6 @@ json *json::json_simplify(const std::string &input) {
     throw std::invalid_argument(std::string("Cannot parse: ") + input);
 }
 
-
-// JSON
-json::json(const enum json_element_type json_element_type) : element_type(json_element_type) {
-
-}
-
-json::json(const std::string json) : element_type(json_element_type::JSON_NONE) {
-    this->jsn = json::json_simplify(json);
-}
-
-const std::string json::at() const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->at();
-}
-const json_view json::at(std::string value) const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->at(value);
-}
-const json_view json::at(u_int64_t index) const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->at(index);
-}
-std::map<std::string, std::string> json::to_map() const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->to_map();
-}
-
-bool json::is_key_truth() const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->is_key_truth();
-}
-
-enum json_element_type json::get_type() const noexcept {
-    return this->element_type;
-}
-
-json::~json() noexcept {
-    delete this->jsn;
-}
-
-// JSON_VIEW
-json_view::json_view(json *jsn) : jsn(jsn) {
-
-}
-
-const std::string json_view::at() const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->at();
-}
-const json_view json_view::at(std::string value) const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->at(value);
-}
-const json_view json_view::at(u_int64_t index) const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->at(index);
-}
-std::map<std::string, std::string> json_view::to_map() const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->to_map();
-}
-
-enum json_element_type json_view::get_type() const noexcept {
-    return this->jsn->get_type();
-}
-
-bool json_view::is_key_truth() const {
-    if (this->jsn == nullptr) {
-        throw json_unsupported_function("jsn = nullptr");
-    }
-    return this->jsn->is_key_truth();
-}
-
-
-// JSON_VALUE
-json_value::json_value(std::string value) noexcept : json(json_element_type::JSON_VALUE), value(value) {
-
-}
-
-const std::string json_value::at() const {
-    return this->value;
-}
-const json_view json_value::at(std::string) const {
-    throw json::generate_unsupported_function("at(string)", "json_value");
-}
-const json_view json_value::at(u_int64_t) const {
-    throw json::generate_unsupported_function("at(u_int64_t)", "json_value");
-}
-std::map<std::string, std::string> json_value::to_map() const noexcept {
-    return std::map<std::string, std::string>{{"", this->value}};
-}
-
-const std::string &json_value::get_value() const noexcept {
-    return this->value;
-}
-
-bool json_value::is_key_truth() const noexcept {
-    return false;
-}
-
-// JSON_OBJECT
-json_object::json_object() noexcept : json(json_element_type::JSON_OBJECT) {
-
-}
-void json_object::insert(std::pair<std::string, json*> p) noexcept {
-    this->get_map().insert(p);
-}
-const std::string json_object::at() const {
-    throw json::generate_unsupported_function("at()", "json_object");
-}
-const json_view json_object::at(std::string key) const {
-    return this->map.at(key);
-}
-const json_view json_object::at(u_int64_t) const {
-    throw json::generate_unsupported_function("at(u_int64_t)", "json_object");
-}
-std::map<std::string, std::string> json_object::to_map() const noexcept {
-    std::map<std::string, std::string> map {};
-
-    for (const auto &[k1, v1] : this->get_map()) {
-        for (const auto &[k2, v2] : v1->to_map()) {
-            map.insert({k1 + (v1->is_key_truth() ? "." : "") + k2, v2});
-        }
-    }
-
-    return map;
-}
-
-std::map<std::string, json*> &json_object::get_map() noexcept {
-    return this->map;
-}
-
-const std::map<std::string, json*> &json_object::get_map() const noexcept {
-    return this->map;
-}
-
-bool json_object::is_key_truth() const noexcept {
-    return true;
-}
-
-json_object::~json_object() noexcept {
-    for (const auto &[k, v] : this->get_map()) {
-        delete v;
-    }
-}
-
-// JSON_ARRAY
-json_array::json_array() noexcept : json(json_element_type::JSON_ARRAY) {
-
-}
-void json_array::insert(json *j) noexcept {
-    this->get_list().push_back(j);
-}
-
-const std::string json_array::at() const {
-    throw json::generate_unsupported_function("at()", "json_array");
-}
-const json_view json_array::at(std::string key) const {
-    throw json::generate_unsupported_function("at(u_int64_t)", "json_array");
-}
-const json_view json_array::at(u_int64_t index) const {
-    return this->list.at(index);
-}
-std::map<std::string, std::string> json_array::to_map() const noexcept {
-    std::map<std::string, std::string> map {};
-
-    u_int64_t index {0};
-    for (const auto &v : this->get_list()) {
-        for (const auto &[k, v2] : v->to_map()) {
-            map.insert({std::to_string(index++) + (v->is_key_truth() ? "." : "") + k, v2});
-        }
-    }
-
-    return map;
-}
-
-std::vector<json*> &json_array::get_list() noexcept {
-    return this->list;
-}
-
-const std::vector<json*> &json_array::get_list() const noexcept {
-    return this->list;
-}
-
-bool json_array::is_key_truth() const noexcept {
-    return true;
-}
-
-json_array::~json_array() noexcept {
-    for (const auto &v : this->get_list()) {
-        delete v;
-    }
-}
 
 // JSON_INVALID
 json_invalid::json_invalid(std::string msg, std::string snippet, u_int64_t pos, std::string what)
