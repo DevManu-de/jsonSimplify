@@ -287,11 +287,6 @@ json_object *json::json_simplify_object(const std::string &input, u_int64_t &off
     return object;
 }
 
-template<typename T>
-json *json::json_simplify(const T &&input) {
-    return json_simplify(input);
-}
-
 json *json::json_simplify(const std::string &input) {
 
     std::vector<char> stack {};
@@ -341,26 +336,71 @@ json *json::json_simplify(const std::string &input) {
 }
 
 
-// JSON_VALUE
-json_value::json_value(std::string value) noexcept : value(value) {
+//JSON
+json::json(const enum json_element_type json_element_type) : element_type(json_element_type) {
 
 }
 
-std::string json_value::at() {
+json::json(const std::string json) : element_type(json_element_type::JSON_NONE) {
+    this->jsn = json::json_simplify(json);
+}
+
+const std::string json::at() const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->at();
+}
+const json *json::at(std::string value) const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->at(value);
+}
+const json *json::at(u_int64_t index) const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->at(index);
+}
+std::map<std::string, std::string> json::to_map() const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->to_map();
+}
+
+bool json::is_key_truth() const {
+    if (this->jsn == nullptr) {
+        throw json_unsupported_function("jsn = nullptr");
+    }
+    return this->jsn->is_key_truth();
+}
+
+enum json_element_type json::get_type() const noexcept {
+    return this->element_type;
+}
+
+json::~json() noexcept {
+    delete this->jsn;
+}
+
+// JSON_VALUE
+json_value::json_value(std::string value) noexcept : json(json_element_type::JSON_VALUE), value(value) {
+
+}
+
+const std::string json_value::at() const {
     return this->value;
 }
-json *json_value::at(std::string) {
+const json *json_value::at(std::string) const {
     throw json::generate_unsupported_function("at(string)", "json_value");
 }
-json *json_value::at(u_int64_t) {
+const json *json_value::at(u_int64_t) const {
     throw json::generate_unsupported_function("at(u_int64_t)", "json_value");
 }
 std::map<std::string, std::string> json_value::to_map() const noexcept {
     return std::map<std::string, std::string>{{"", this->value}};
-}
-
-const json_element_type json_value::get_type() const noexcept {
-    return json_element_type::JSON_VALUE;
 }
 
 const std::string &json_value::get_value() const noexcept {
@@ -372,19 +412,19 @@ bool json_value::is_key_truth() const noexcept {
 }
 
 // JSON_OBJECT
-json_object::json_object() noexcept {
+json_object::json_object() noexcept : json(json_element_type::JSON_OBJECT) {
 
 }
 void json_object::insert(std::pair<std::string, json*> p) noexcept {
     this->get_map().insert(p);
 }
-std::string json_object::at() {
+const std::string json_object::at() const {
     throw json::generate_unsupported_function("at()", "json_object");
 }
-json *json_object::at(std::string key) {
+const json *json_object::at(std::string key) const {
     return this->map.at(key);
 }
-json *json_object::at(u_int64_t) {
+const json *json_object::at(u_int64_t) const {
     throw json::generate_unsupported_function("at(u_int64_t)", "json_object");
 }
 std::map<std::string, std::string> json_object::to_map() const noexcept {
@@ -397,10 +437,6 @@ std::map<std::string, std::string> json_object::to_map() const noexcept {
     }
 
     return map;
-}
-
-const json_element_type json_object::get_type() const noexcept {
-    return json_element_type::JSON_OBJECT;
 }
 
 std::map<std::string, json*> &json_object::get_map() noexcept {
@@ -422,37 +458,33 @@ json_object::~json_object() noexcept {
 }
 
 // JSON_ARRAY
-json_array::json_array() noexcept {
+json_array::json_array() noexcept : json(json_element_type::JSON_ARRAY) {
 
 }
 void json_array::insert(json *j) noexcept {
     this->get_list().push_back(j);
 }
 
-std::string json_array::at() {
-    throw json::generate_unsupported_function("at()", "json_object");
+const std::string json_array::at() const {
+    throw json::generate_unsupported_function("at()", "json_array");
 }
-json *json_array::at(std::string key) {
-    throw json::generate_unsupported_function("at(u_int64_t)", "json_value");
+const json *json_array::at(std::string key) const {
+    throw json::generate_unsupported_function("at(u_int64_t)", "json_array");
 }
-json *json_array::at(u_int64_t index) {
+const json *json_array::at(u_int64_t index) const {
     return this->list.at(index);
 }
 std::map<std::string, std::string> json_array::to_map() const noexcept {
     std::map<std::string, std::string> map {};
 
     u_int64_t index {0};
-    for (auto v : this->get_list()) {
+    for (const auto &v : this->get_list()) {
         for (const auto &[k, v2] : v->to_map()) {
             map.insert({std::to_string(index++) + (v->is_key_truth() ? "." : "") + k, v2});
         }
     }
 
     return map;
-}
-
-const json_element_type json_array::get_type() const noexcept {
-    return json_element_type::JSON_ARRAY;
 }
 
 std::vector<json*> &json_array::get_list() noexcept {

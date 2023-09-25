@@ -20,11 +20,11 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
         content.append(s);
     }
 
-    std::unique_ptr<json_simplify::json> parsed {json_simplify::json::json_simplify(content)};
+    const json_simplify::json parsed {json_simplify::json(content)};
 
     try {
         int i {0};
-        for (const auto &[k, v] : parsed->to_map()) {
+        for (const auto &[k, v] : parsed.to_map()) {
             std::cout << k << ":\t" << v << std::endl;
             ++i;
         }

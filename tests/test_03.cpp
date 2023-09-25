@@ -1,15 +1,37 @@
+#include <iostream>
+#include <cstring>
 #include <memory>
+
 #include "json_simplify.hpp"
 
+int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[], __attribute__((unused)) char *envp[]) {
 
-int main(int argc, char *argv[]) {
+    std::ifstream file{"cases/test03.txt"};
 
-    std::unique_ptr<json_simplify::json> a {json_simplify::json::json_simplify("{ \"a\": false}")};
-    std::string value {((json_simplify::json_value *) (a->at("a")))->get_value()};
-
-    if (value == "false") {
-        return 0;
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file" << std::endl;
+        exit(1);
     }
 
-    return 1;
+    std::string content {};
+
+    std::string s {};
+    while(getline(file, s)) {
+        content.append(s);
+    }
+
+    const json_simplify::json parsed {json_simplify::json(content)};
+
+    try {
+        int i {0};
+        for (const auto &[k, v] : parsed.to_map()) {
+            std::cout << k << ":\t" << v << std::endl;
+            ++i;
+        }
+        std::cout << i << std::endl;
+    } catch (const json_simplify::json_invalid &e) {
+        std::cerr << e.format() << std::endl;
+    }
+
+    return 0;
 }
