@@ -23,6 +23,14 @@ std::string json_simplify::json_value::to_string(int level, bool prettify) const
     return this->get_value();
 }
 
+void json_simplify::json_value::add(json_element *element) {
+    throw json_simplify::generate_unsupported_function("add(json_element)", "json_value");
+}
+
+void json_simplify::json_value::add(std::string key, json_element *element) {
+    throw json_simplify::generate_unsupported_function("add(string, json_element)", "json_value");
+}
+
 const std::string &json_simplify::json_value::get_value() const noexcept {
     return this->value;
 }

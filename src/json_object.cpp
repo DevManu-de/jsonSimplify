@@ -72,6 +72,14 @@ std::string json_simplify::json_object::to_string(int level, bool prettify) cons
     return buffer;
 }
 
+void json_simplify::json_object::add(json_element *element) {
+    throw json_simplify::generate_unsupported_function("add(json_element)", "json_object");
+}
+
+void json_simplify::json_object::add(std::string key, json_element *element) {
+    this->insert({key, element});
+}
+
 std::map<std::string, json_simplify::json_element*> &json_simplify::json_object::get_map() noexcept {
     return this->map;
 }

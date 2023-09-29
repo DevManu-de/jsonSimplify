@@ -33,5 +33,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
         std::cerr << e.format() << std::endl;
     }
 
-    return 0;
+    if (parsed.to_map().size() == 74) {
+        return 0;
+    }
+
+    return 1;
 }

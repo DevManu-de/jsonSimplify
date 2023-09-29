@@ -20,7 +20,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
         content.append(s);
     }
 
-    const json_simplify::json parsed {content};
+    json_simplify::json parsed {content};
 
     try {
         int i {0};
@@ -33,10 +33,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
         std::cerr << e.format() << std::endl;
     }
 
-    std::cout << parsed.at("glossary").at("title").at() << std::endl;
-    std::cout << parsed.at("glossary").at("GlossDiv").at("GlossList").at("GlossEntry").at("GlossTerm").at() << std::endl;
+    if (parsed.to_map().size() == 9) {
+        return 0;
+    }
 
-    std::cout << parsed.to_string(false) << std::endl;
-
-    return 0;
+    return 1;
 }

@@ -27,6 +27,8 @@ public:
     const json at(u_int64_t) const;
     std::map<std::string, std::string> to_map() const noexcept;
     std::string to_string(int level, bool prettify = false) const noexcept;
+    void add(json_element *element);
+    void add(std::string key, json_element *element);
 
     const std::map<std::string, json_element*> &get_map() const noexcept;
 

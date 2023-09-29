@@ -22,8 +22,9 @@ std::map<std::string, std::string> json_simplify::json_array::to_map() const noe
     u_int64_t index {0};
     for (const auto &v : this->get_list()) {
         for (const auto &[k, v2] : v->to_map()) {
-            map.insert({std::to_string(index++) + (v->is_key_truth() ? "." : "") + k, v2});
+            map.insert({std::to_string(index) + (v->is_key_truth() ? "." : "") + k, v2});
         }
+        ++index;
     }
 
     return map;
@@ -66,6 +67,14 @@ std::string json_simplify::json_array::to_string(int level, bool prettify) const
     buffer.append("]");
 
     return buffer;
+}
+
+void json_simplify::json_array::add(json_element *element) {
+    this->insert(element);
+}
+
+void json_simplify::json_array::add(std::string key, json_element *element) {
+    throw json_simplify::generate_unsupported_function("add(string, json_element)", "json_array");
 }
 
 std::vector<json_simplify::json_element*> &json_simplify::json_array::get_list() noexcept {

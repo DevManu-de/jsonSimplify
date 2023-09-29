@@ -168,11 +168,13 @@ json_array *json_simplify::json_simplify_array(const std::string &input, u_int64
             was_value_quoted = false;
         } else if (in_string && !is_value_sealed) {
             value_buffer.append(1, (is_escaped ? resolve_escape_characters(c) : c));
+            was_value_quoted = in_string;
             is_escaped = false;
         } else if (c == '{' && !in_string && !is_value_sealed) {
             array->insert(json_simplify_object(input.substr(i), i));
             is_escaped = false;
             is_value_sealed = true;
+            is_value_truth = false;
         } else if (c == '[' && !in_string && !is_value_sealed) {
             array->insert(json_simplify_array(json.substr(i), i));
             is_escaped = false;
@@ -187,7 +189,7 @@ json_array *json_simplify::json_simplify_array(const std::string &input, u_int64
                 is_value_sealed = true;
                 was_value_quoted = in_string;
             } else {
-                throw generate_error_message("Cannot parse: ", json, i, 10);
+                throw generate_error_message("Cannot parse: ", json, i + skip - 1, 10);
             }
             is_escaped = false;
         }
