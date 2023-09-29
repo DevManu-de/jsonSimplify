@@ -42,7 +42,6 @@ json_unsupported_function generate_unsupported_function(std::string fn_name, std
 
 
 enum class json_element_type {
-    JSON_NONE,
     JSON_VALUE,
     JSON_OBJECT,
     JSON_ARRAY

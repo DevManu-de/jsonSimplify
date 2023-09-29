@@ -12,6 +12,7 @@ enum class json_element_type;
 class json {
 private:
     const json_element *jsn = nullptr;
+    const bool free_jsn;
 
 public:
 
@@ -23,6 +24,7 @@ public:
     const json at(u_int64_t) const;
     std::map<std::string, std::string> to_map() const;
     bool is_key_truth() const;
+    std::string to_string(bool prettify = false) const noexcept;
 
     enum json_element_type get_type() const noexcept;
 

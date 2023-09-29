@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 namespace json_simplify {
 
@@ -12,6 +13,10 @@ enum class json_element_type;
 class json_element {
 private:
     const json_element_type element_type;
+
+protected:
+    static std::string level_to_spaces(int level, std::string str = "    ") noexcept;
+
 public:
     json_element(enum json_element_type element_type);
 
@@ -20,7 +25,9 @@ public:
     virtual const json at(u_int64_t) const = 0;
     virtual std::map<std::string, std::string> to_map() const = 0;
     virtual bool is_key_truth() const = 0;
+    virtual std::string to_string(int level, bool prettified = false) const noexcept = 0;
 
+    std::string to_string(bool prettify) const noexcept;
     enum json_element_type get_type() const noexcept;
 
     virtual ~json_element() = default;

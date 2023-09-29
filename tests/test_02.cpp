@@ -33,5 +33,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
         std::cerr << e.format() << std::endl;
     }
 
+    std::cout << parsed.to_string(true) << std::endl;
+
     return 0;
 }

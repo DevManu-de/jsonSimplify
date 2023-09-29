@@ -1,10 +1,10 @@
 #include "json_simplify.hpp"
 
-json_simplify::json::json(const std::string json) : jsn(json_simplify::json_simplify(json)) {
+json_simplify::json::json(const std::string json) : jsn(json_simplify::json_simplify(json)), free_jsn(true) {
 
 }
 
-json_simplify::json::json(const json_element *jsn) : jsn(jsn) {
+json_simplify::json::json(const json_element *jsn) : jsn(jsn), free_jsn(false) {
 
 }
 
@@ -40,6 +40,12 @@ bool json_simplify::json::is_key_truth() const {
     return this->jsn->is_key_truth();
 }
 
+std::string json_simplify::json::to_string(bool prettify) const noexcept {
+    return this->jsn->to_string(prettify);
+}
+
 json_simplify::json::~json() noexcept {
-    delete this->jsn;
+    if (this->free_jsn) {
+        delete this->jsn;
+    }
 }

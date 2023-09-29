@@ -142,6 +142,7 @@ json_array *json_simplify::json_simplify_array(const std::string &input, u_int64
     std::string value_buffer {};
     bool is_value_sealed = false;
     bool is_value_truth = false;
+    bool was_value_quoted = false;
 
     for (u_int64_t i = 1; i < json.length() - 1; ++i) {
         const char c = json[i];
@@ -160,10 +161,11 @@ json_array *json_simplify::json_simplify_array(const std::string &input, u_int64
                 throw generate_error_message("Cannot parse: ", json, i, 10);
             }
             if (is_value_truth) {
-                array->insert(new json_value(value_buffer));
+                array->insert(new json_value(value_buffer, was_value_quoted));
                 value_buffer.clear();
             }
             is_value_sealed = false;
+            was_value_quoted = false;
         } else if (in_string && !is_value_sealed) {
             value_buffer.append(1, (is_escaped ? resolve_escape_characters(c) : c));
             is_escaped = false;
@@ -183,6 +185,7 @@ json_array *json_simplify::json_simplify_array(const std::string &input, u_int64
                 value_buffer.append(tmp);
                 i += skip - 1;
                 is_value_sealed = true;
+                was_value_quoted = in_string;
             } else {
                 throw generate_error_message("Cannot parse: ", json, i, 10);
             }
@@ -191,7 +194,7 @@ json_array *json_simplify::json_simplify_array(const std::string &input, u_int64
     }
 
     if (is_value_truth) {
-        array->insert(new json_value(value_buffer));
+        array->insert(new json_value(value_buffer, was_value_quoted));
     }
 
     return array;
@@ -212,6 +215,7 @@ json_object *json_simplify::json_simplify_object(const std::string &input, u_int
     bool is_key_truth = false;
     std::string value_buffer {};
     bool is_value_sealed = false;
+    bool was_value_quoted = false;
 
     for (u_int64_t i = 1; i < json_string.length() - 1; ++i) {
         const char c = json_string[i];
@@ -239,7 +243,7 @@ json_object *json_simplify::json_simplify_object(const std::string &input, u_int
             if (!is_key_sealed || !is_value_sealed) {
                 throw generate_error_message("Cannot parse: ", json_string, i, 10);
             } else if (is_key_truth) {
-                object->insert({key_buffer, new json_value(value_buffer)});
+                object->insert({key_buffer, new json_value(value_buffer, was_value_quoted)});
             }
             key_buffer.clear();
             value_buffer.clear();
@@ -248,6 +252,7 @@ json_object *json_simplify::json_simplify_object(const std::string &input, u_int
             is_key_truth = false;
 
             is_value = false;
+            was_value_quoted = false;
         } else if (in_string && !is_value && !is_key_sealed) {
             key_buffer.append(1, (is_escaped ? resolve_escape_characters(c) : c));
             is_escaped = false;
@@ -259,6 +264,7 @@ json_object *json_simplify::json_simplify_object(const std::string &input, u_int
                 i += skip - 1;
                 is_value_sealed = true;
                 is_key_truth = true;
+                was_value_quoted = in_string;
             } else {
                 throw generate_error_message("Cannot parse: ", json_string, i, 10);
             }
@@ -281,7 +287,7 @@ json_object *json_simplify::json_simplify_object(const std::string &input, u_int
     }
 
     if (is_key_truth) {
-        object->insert({key_buffer, new json_value(value_buffer)});
+        object->insert({key_buffer, new json_value(value_buffer, was_value_quoted)});
     }
 
     return object;
@@ -330,7 +336,7 @@ json_element *json_simplify::json_simplify(const std::string &input) {
     }
 
     if (input.empty()) {
-        return new json_value("");
+        return new json_value("", true);
     }
     throw std::invalid_argument(std::string("Cannot parse: ") + input);
 }

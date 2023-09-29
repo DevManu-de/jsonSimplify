@@ -1,6 +1,6 @@
 #include "json_simplify.hpp"
 
-json_simplify::json_value::json_value(std::string value) noexcept : json_element(json_element_type::JSON_VALUE), value(value) {
+json_simplify::json_value::json_value(std::string value, bool quoted) noexcept : json_element(json_element_type::JSON_VALUE), value(value), quoted(quoted) {
 
 }
 
@@ -15,6 +15,12 @@ const json_simplify::json json_simplify::json_value::at(u_int64_t) const {
 }
 std::map<std::string, std::string> json_simplify::json_value::to_map() const noexcept {
     return std::map<std::string, std::string>{{"", this->value}};
+}
+std::string json_simplify::json_value::to_string(int level, bool prettify) const noexcept {
+    if (this->quoted) {
+        return std::string("\"") + this->get_value() + "\"";
+    }
+    return this->get_value();
 }
 
 const std::string &json_simplify::json_value::get_value() const noexcept {

@@ -27,6 +27,51 @@ std::map<std::string, std::string> json_simplify::json_object::to_map() const no
     return map;
 }
 
+std::string json_simplify::json_object::to_string(int level, bool prettify) const noexcept {
+    std::string buffer {"{"};
+
+    if (prettify) {
+        buffer.append("\n");
+    }
+
+    for (const auto &[k, v] : this->get_map()) {
+        if (prettify) {
+            buffer.append(json_element::level_to_spaces(level));
+        }
+        buffer.append("\"");
+        buffer.append(k);
+        buffer.append("\":");
+        if (prettify) {
+            buffer.append(" ");
+        }
+        buffer.append(v->to_string(level + 1, prettify));
+        if (prettify) {
+            buffer.append(",\n");
+        } else {
+            buffer.append(",");
+        }
+
+    }
+
+    if (prettify) {
+        if (buffer.ends_with(",\n")) {
+            buffer.pop_back();
+            buffer.pop_back();
+        }
+        buffer.append("\n");
+        buffer.append(json_element::level_to_spaces(level - 1));
+    } else {
+        if (buffer.ends_with(",")) {
+            buffer.pop_back();
+        }
+    }
+
+
+
+    buffer.append("}");
+    return buffer;
+}
+
 std::map<std::string, json_simplify::json_element*> &json_simplify::json_object::get_map() noexcept {
     return this->map;
 }
