@@ -13,7 +13,15 @@ const json_simplify::json json_simplify::json_value::at(std::string) const {
 const json_simplify::json json_simplify::json_value::at(u_int64_t) const {
     throw json_simplify::generate_unsupported_function("at(u_int64_t)", "json_value");
 }
-std::map<std::string, std::string> json_simplify::json_value::to_map() const noexcept {
+
+std::vector<json_simplify::json> json_simplify::json_value::to_vector() const {
+    throw json_simplify::generate_unsupported_function("to_vector", "json_value");
+}
+
+std::map<std::string, json_simplify::json> json_simplify::json_value::to_map() const {
+    throw json_simplify::generate_unsupported_function("to_map", "json_value");
+}
+std::map<std::string, std::string> json_simplify::json_value::to_pairs() const noexcept {
     return std::map<std::string, std::string>{{"", this->value}};
 }
 std::string json_simplify::json_value::to_string(int level, bool prettify) const noexcept {

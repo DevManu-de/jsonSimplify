@@ -21,8 +21,12 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
     }
 
     json_simplify::json parsed {content};
+    json_simplify::json parsed2 {content};
+    parsed2.root() = false;
 
-    try {
+    parsed["glossary"].add("child", parsed2);
+
+    /*try {
         int i {0};
         for (const auto &[k, v] : parsed.to_map()) {
             std::cout << k << ":\t" << v << std::endl;
@@ -31,9 +35,11 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
         std::cout << i << std::endl;
     } catch (const json_simplify::json_invalid &e) {
         std::cerr << e.format() << std::endl;
-    }
+    }*/
 
-    if (parsed.to_map().size() == 9) {
+    std::cout << parsed.to_string(true) << std::endl;
+
+    if (parsed.to_pairs().size() == 9) {
         return 0;
     }
 

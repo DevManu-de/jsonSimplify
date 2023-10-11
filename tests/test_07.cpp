@@ -22,13 +22,13 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
     jsn2.at("list").at(3).add("definitions", JSON_SIMPLIFY_DEFAULT_ARRAY()).at("definitions").add(json("1a", true)).add(json("2", false)).add(json("3", false));
 
     cout << jsn2.to_string(true) << endl;
-    for (const auto &[k, v] : jsn2.to_map()) {
+    for (const auto &[k, v] : jsn2.to_pairs()) {
         cout << k << ": " << v << endl;
     }
 
     try {
         json jsn3 {jsn2.to_string()};
-        if (jsn3.to_map().size() == 8) {
+        if (jsn3.to_pairs().size() == 8) {
             return 0;
         }
     } catch (json_invalid e) {

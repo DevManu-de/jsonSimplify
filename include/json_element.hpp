@@ -23,7 +23,9 @@ public:
     virtual const std::string at() const = 0;
     virtual const json at(std::string) const = 0;
     virtual const json at(u_int64_t) const = 0;
-    virtual std::map<std::string, std::string> to_map() const = 0;
+    virtual std::vector<json> to_vector() const = 0;
+    virtual std::map<std::string, json> to_map() const = 0;
+    virtual std::map<std::string, std::string> to_pairs() const noexcept = 0;
     virtual bool is_key_truth() const = 0;
     virtual std::string to_string(int level, bool prettified = false) const noexcept = 0;
     virtual void add(json_element *element) = 0;

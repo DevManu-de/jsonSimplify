@@ -24,7 +24,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
         const json_simplify::json parsed {json_simplify::json(content)};
 
         int i {0};
-        for (const auto &[k, v] : parsed.to_map()) {
+        for (const auto &[k, v] : parsed.to_pairs()) {
             std::cout << k << ":\t" << v << std::endl;
             ++i;
         }

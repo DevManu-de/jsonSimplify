@@ -15,11 +15,23 @@ const json_simplify::json json_simplify::json_object::at(std::string key) const 
 const json_simplify::json json_simplify::json_object::at(u_int64_t) const {
     throw json_simplify::generate_unsupported_function("at(u_int64_t)", "json_object");
 }
-std::map<std::string, std::string> json_simplify::json_object::to_map() const noexcept {
+
+std::vector<json_simplify::json> json_simplify::json_object::to_vector() const {
+    throw json_simplify::generate_unsupported_function("to_vector", "json_obkect");
+}
+
+std::map<std::string, json_simplify::json> json_simplify::json_object::to_map() const {
+    std::map<std::string, json> map{};
+    for (const auto &[k, v] : this->get_map()) {
+        map.insert({k, json(v)});
+    }
+    return map;
+}
+std::map<std::string, std::string> json_simplify::json_object::to_pairs() const noexcept {
     std::map<std::string, std::string> map {};
 
     for (const auto &[k1, v1] : this->get_map()) {
-        for (const auto &[k2, v2] : v1->to_map()) {
+        for (const auto &[k2, v2] : v1->to_pairs()) {
             map.insert({k1 + (v1->is_key_truth() ? "." : "") + k2, v2});
         }
     }
