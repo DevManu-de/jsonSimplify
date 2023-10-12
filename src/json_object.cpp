@@ -17,7 +17,7 @@ const json_simplify::json json_simplify::json_object::at(u_int64_t) const {
 }
 
 std::vector<json_simplify::json> json_simplify::json_object::to_vector() const {
-    throw json_simplify::generate_unsupported_function("to_vector", "json_obkect");
+    throw json_simplify::generate_unsupported_function("to_vector", "json_object");
 }
 
 std::map<std::string, json_simplify::json> json_simplify::json_object::to_map() const {
