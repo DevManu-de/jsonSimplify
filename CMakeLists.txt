@@ -26,6 +26,8 @@ add_library(jsonSimplify STATIC
 
 target_compile_definitions(jsonSimplify PRIVATE JSONSIMPLIFY_LIBRARY)
 
-if(("$ENV{JSON_SIMPLIFY_TESTS}" STREQUAL "TRUE") OR ("$ENV{JSON_SIMPLIFY_TESTS}" STREQUAL "1"))
+if(("$ENV{JSON_SIMPLIFY_TESTS}" STREQUAL "true") OR
+   ("$ENV{JSON_SIMPLIFY_TESTS}" STREQUAL "TRUE") OR
+   ("$ENV{JSON_SIMPLIFY_TESTS}" STREQUAL "1"))
     add_subdirectory(tests)
 endif()
