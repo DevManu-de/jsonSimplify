@@ -8,8 +8,8 @@ json_simplify::json::json(json_element *jsn) : jsn(jsn), free_jsn(false) {
 
 }
 
-json_simplify::json::json(const std::string value, const bool quoted) : jsn(new json_value(value, quoted)), free_jsn(false) {
-
+json_simplify::json::json(const std::string value, const bool quoted)
+    : jsn(new json_value(value, quoted)), free_jsn(true) {
 }
 
 json_simplify::json::json(const JSON_SIMPLIFY_DEFAULT_ARRAY vec, const bool root) : jsn(new json_array()), free_jsn(root) {
@@ -82,14 +82,26 @@ std::string json_simplify::json::to_string(bool prettify) const noexcept {
     return this->jsn->to_string(prettify);
 }
 
-json_simplify::json &json_simplify::json::add(json jsn) {
+json_simplify::json &json_simplify::json::add(json &jsn) {
     this->jsn->add(jsn.jsn);
+    jsn.root() = false;
+    jsn.jsn = nullptr;
     return *this;
 }
 
-json_simplify::json &json_simplify::json::add(const std::string key, json jsn) {
+json_simplify::json &json_simplify::json::add(json &&jsn) {
+    return this->add(jsn);
+}
+
+json_simplify::json &json_simplify::json::add(const std::string key, json &jsn) {
     this->jsn->add(key, jsn.jsn);
+    jsn.root() = false;
+    jsn.jsn = nullptr;
     return *this;
+}
+
+json_simplify::json &json_simplify::json::add(const std::string key, json &&jsn) {
+    return this->add(key, jsn);
 }
 
 bool &json_simplify::json::root() noexcept {

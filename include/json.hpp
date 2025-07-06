@@ -48,8 +48,10 @@ public:
     std::map<std::string, std::string> to_pairs() const;
     bool is_key_truth() const;
     std::string to_string(bool prettify = false) const noexcept;
-    json_simplify::json &add(const json jsn);
-    json_simplify::json &add(const std::string key, const json jsn);
+    json_simplify::json &add(json &jsn);
+    json_simplify::json &add(json &&jsn);
+    json_simplify::json &add(const std::string key, json &jsn);
+    json_simplify::json &add(const std::string key, json &&jsn);
 
     bool &root() noexcept;
     enum json_element_type get_type() const noexcept;

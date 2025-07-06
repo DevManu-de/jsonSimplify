@@ -22,9 +22,9 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
 
     json_simplify::json parsed {content};
     json_simplify::json parsed2 {content};
-    parsed2.root() = false;
 
     parsed["glossary"].add("child", parsed2);
+    //parsed2["glossary"].add("child", parsed);
 
     /*try {
         int i {0};
