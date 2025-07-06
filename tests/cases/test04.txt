@@ -1,0 +1,49 @@
+{
+    "buttons": [
+        {
+            "id": "14045db8-2bbe-4bd6-887f-85bcfd567643",
+            "name": "Tisch 1 Dev01",
+            "serial_number": "ASDFGHJKL12390",
+            "status": {
+                "description": "Status when a button was clicked",
+                "id": "0bcd2c9a-a04e-496d-b287-af97cf8839ca",
+                "name": "clicked"
+            },
+            "status_timestamp": "Wed, 16 Aug 2023 22:43:08 GMT"
+        },
+        {
+            "id": "8c7e7105-372c-40da-b599-169c99cb2a3e",
+            "name": "Tisch 2 Weiss",
+            "serial_number": "ASDFGHJKL12390",
+            "status": {
+                "description": "Status when a waitress/waiter has checked the table and everything is fine",
+                "id": "f2300982-93b0-4b6e-a223-ad868f042e42",
+                "name": "done"
+            },
+            "status_timestamp": "Sat, 26 Aug 2023 16:16:36 GMT"
+        },
+        {
+            "id": "6e2b04bc-6d64-40ee-9c1b-b8b3b139dc07",
+            "name": "Tisch 3 Braun",
+            "serial_number": "ASDFGHJKL12390",
+            "status": {
+                "description": "Status when a waitress/waiter has checked the table and everything is fine",
+                "id": "f2300982-93b0-4b6e-a223-ad868f042e42",
+                "name": "done"
+            },
+            "status_timestamp": "Wed, 16 Aug 2023 22:43:08 GMT"
+        },
+        {
+            "id": "a79f9197-62db-4306-92ed-1a7fdb98e81d",
+            "name": "Tisch 4 Schwarz",
+            "serial_number": "ASDFGHJKL12390",
+            "status": {
+                "description": "Status when a waitress/waiter has checked the table and everything is fine",
+                "id": "f2300982-93b0-4b6e-a223-ad868f042e42",
+                "name": "done"
+            },
+            "status_timestamp": "Sat, 26 Aug 2023 16:16:41 GMT"
+        }
+    ],
+    "status": "success"
+}
