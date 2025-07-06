@@ -31,8 +31,9 @@ public:
     std::string to_string(int level, bool prettify = false) const noexcept;
     void add(json_element *element);
     void add(std::string key, json_element *element);
+    json_element *deep_copy() const noexcept;
 
-    const std::map<std::string, json_element*> &get_map() const noexcept;
+    const std::map<std::string, json_element *> &get_map() const noexcept;
 
     ~json_object() noexcept;
 };

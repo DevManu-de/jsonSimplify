@@ -32,7 +32,10 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
     } catch (const json_simplify::json_invalid &e) {
         std::cerr << e.format() << std::endl;
     }
-    
+
+    int i;
+    std::cin >> i;
+
     if (parsed.to_pairs().size() == 79200) {
         return 0;
     }

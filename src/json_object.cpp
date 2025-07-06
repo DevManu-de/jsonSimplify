@@ -92,6 +92,14 @@ void json_simplify::json_object::add(std::string key, json_element *element) {
     this->insert({key, element});
 }
 
+json_simplify::json_element *json_simplify::json_object::deep_copy() const noexcept {
+    json_simplify::json_object *j = new json_object();
+    for (const auto &[k, v] : this->get_map()) {
+        j->add(k, v->deep_copy());
+    }
+    return j;
+}
+
 std::map<std::string, json_simplify::json_element*> &json_simplify::json_object::get_map() noexcept {
     return this->map;
 }

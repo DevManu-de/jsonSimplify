@@ -89,6 +89,14 @@ void json_simplify::json_array::add(std::string key, json_element *element) {
     throw json_simplify::generate_unsupported_function("add(string, json_element)", "json_array");
 }
 
+json_simplify::json_element *json_simplify::json_array::deep_copy() const noexcept {
+    json_element *j = new json_array();
+    for (const auto *je : this->get_list()) {
+        j->add(je->deep_copy());
+    }
+    return j;
+}
+
 std::vector<json_simplify::json_element*> &json_simplify::json_array::get_list() noexcept {
     return this->list;
 }

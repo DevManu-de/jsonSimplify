@@ -29,6 +29,7 @@ public:
     std::string to_string(int level, bool prettify = false) const noexcept;
     void add(json_element *element);
     void add(std::string key, json_element *element);
+    json_element *deep_copy() const noexcept;
 
     const std::string &get_value() const noexcept;
 

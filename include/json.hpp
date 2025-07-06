@@ -21,7 +21,7 @@ private:
     json_element *jsn = nullptr;
     bool free_jsn;
 
-    json(json_element *jsn);
+    json(json_element *jsn, const bool root = false);
 
     friend class json_value;
     friend class json_object;
@@ -48,10 +48,11 @@ public:
     std::map<std::string, std::string> to_pairs() const;
     bool is_key_truth() const;
     std::string to_string(bool prettify = false) const noexcept;
-    json_simplify::json &add(json &jsn);
-    json_simplify::json &add(json &&jsn);
-    json_simplify::json &add(const std::string key, json &jsn);
-    json_simplify::json &add(const std::string key, json &&jsn);
+    json_simplify::json &add(json &jsn, bool copy = false);
+    json_simplify::json &add(json &&jsn, bool copy = false);
+    json_simplify::json &add(const std::string key, json &jsn, bool copy = false);
+    json_simplify::json &add(const std::string key, json &&jsn, bool copy = false);
+    json_simplify::json deep_copy() const noexcept;
 
     bool &root() noexcept;
     enum json_element_type get_type() const noexcept;

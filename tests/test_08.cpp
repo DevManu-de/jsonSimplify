@@ -23,22 +23,19 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
     json_simplify::json parsed {content};
     json_simplify::json parsed2 {content};
 
-    parsed["glossary"].add("child1", parsed2);
+    parsed["glossary"].add("child1", parsed2, true);
+    parsed2["glossary"].add("child2", parsed);
+    json_simplify::json parsed2deepcopy = parsed2.deep_copy();
 
-    /*try {
-        int i {0};
-        for (const auto &[k, v] : parsed.to_map()) {
-            std::cout << k << ":\t" << v << std::endl;
-            ++i;
-        }
-        std::cout << i << std::endl;
-    } catch (const json_simplify::json_invalid &e) {
-        std::cerr << e.format() << std::endl;
-    }*/
+    std::cout << parsed2.to_string(true) << std::endl;
 
-    std::cout << parsed.to_string(true) << std::endl;
+    try {
+        parsed.at("asdf");
+        return 1;
+    } catch (json_simplify::json_unsupported_function &e) {
+    }
 
-    if (parsed.to_pairs().size() == 18) {
+    if (parsed2.to_pairs() == parsed2deepcopy.to_pairs()) {
         return 0;
     }
 

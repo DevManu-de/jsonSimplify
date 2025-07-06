@@ -15,7 +15,7 @@ class json_array : public json_element {
 private:
     std::vector<json_element*> list {};
 
-    std::vector<json_element*> &get_list() noexcept;
+    std::vector<json_element *> &get_list() noexcept;
 
 protected:
     bool is_key_truth() const noexcept;
@@ -32,8 +32,9 @@ public:
     std::string to_string(int level, bool prettify = false) const noexcept;
     void add(json_element *element);
     void add(std::string key, json_element *element);
+    json_element *deep_copy() const noexcept;
 
-    const std::vector<json_element*> &get_list() const noexcept;
+    const std::vector<json_element *> &get_list() const noexcept;
 
     ~json_array() noexcept;
 };

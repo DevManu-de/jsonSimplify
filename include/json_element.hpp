@@ -30,6 +30,7 @@ public:
     virtual std::string to_string(int level, bool prettified = false) const noexcept = 0;
     virtual void add(json_element *element) = 0;
     virtual void add(std::string key, json_element *element) = 0;
+    virtual json_element *deep_copy() const noexcept = 0;
 
     std::string to_string(bool prettify) const noexcept;
     enum json_element_type get_type() const noexcept;

@@ -4,8 +4,7 @@ json_simplify::json::json(const std::string json)
     : jsn(json_simplify::json_simplify(json)), free_jsn(true) {
 }
 
-json_simplify::json::json(json_element *jsn) : jsn(jsn), free_jsn(false) {
-
+json_simplify::json::json(json_element *jsn, const bool root) : jsn(jsn), free_jsn(root) {
 }
 
 json_simplify::json::json(const std::string value, const bool quoted)
@@ -82,30 +81,48 @@ std::string json_simplify::json::to_string(bool prettify) const noexcept {
     return this->jsn->to_string(prettify);
 }
 
-json_simplify::json &json_simplify::json::add(json &jsn) {
-    this->jsn->add(jsn.jsn);
-    jsn.root() = false;
-    jsn.jsn = nullptr;
+json_simplify::json &json_simplify::json::add(json &jsn, bool copy) {
+    if (this->jsn == nullptr) {
+        throw json_simplify::json_unsupported_function("jsn = nullptr");
+    }
+    if (copy) {
+        this->jsn->add(jsn.jsn->deep_copy());
+    } else {
+        this->jsn->add(jsn.jsn);
+        jsn.root() = false;
+        jsn.jsn = nullptr;
+    }
     return *this;
 }
 
-json_simplify::json &json_simplify::json::add(json &&jsn) {
-    return this->add(jsn);
+json_simplify::json &json_simplify::json::add(json &&jsn, bool copy) {
+    return this->add(jsn, copy);
 }
 
-json_simplify::json &json_simplify::json::add(const std::string key, json &jsn) {
-    this->jsn->add(key, jsn.jsn);
-    jsn.root() = false;
-    jsn.jsn = nullptr;
+json_simplify::json &json_simplify::json::add(const std::string key, json &jsn, bool copy) {
+    if (this->jsn == nullptr) {
+        throw json_simplify::json_unsupported_function("jsn = nullptr");
+    }
+    if (copy) {
+        this->jsn->add(key, jsn.jsn->deep_copy());
+    } else {
+        this->jsn->add(key, jsn.jsn);
+        jsn.root() = false;
+        jsn.jsn = nullptr;
+    }
     return *this;
 }
 
-json_simplify::json &json_simplify::json::add(const std::string key, json &&jsn) {
-    return this->add(key, jsn);
+json_simplify::json &json_simplify::json::add(const std::string key, json &&jsn, bool copy) {
+    return this->add(key, jsn, copy);
 }
 
 bool &json_simplify::json::root() noexcept {
     return this->free_jsn;
+}
+
+json_simplify::json json_simplify::json::deep_copy() const noexcept {
+    return {this->jsn->deep_copy(), true};
 }
 
 enum json_simplify::json_element_type json_simplify::json::get_type() const noexcept {
