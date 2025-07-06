@@ -26,7 +26,9 @@ public:
     const std::string at() const;
     const json at(std::string) const;
     const json at(u_int64_t) const;
-    std::map<std::string, std::string> to_map() const noexcept;
+    std::vector<json> to_vector() const;
+    std::map<std::string, json> to_map() const;
+    std::map<std::string, std::string> to_pairs() const noexcept;
     std::string to_string(int level, bool prettify = false) const noexcept;
     void add(json_element *element);
     void add(std::string key, json_element *element);
@@ -35,7 +37,6 @@ public:
 
     ~json_array() noexcept;
 };
-
 }
 
 #endif // JSON_ARRAY_HPP

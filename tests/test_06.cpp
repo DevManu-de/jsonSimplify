@@ -24,7 +24,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
 
     try {
         int i {0};
-        for (const auto &[k, v] : parsed.to_map()) {
+        for (const auto &[k, v] : parsed.to_pairs()) {
             std::cout << k << ":\t" << v << std::endl;
             ++i;
         }
@@ -32,8 +32,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[],
     } catch (const json_simplify::json_invalid &e) {
         std::cerr << e.format() << std::endl;
     }
-
-    if (parsed.to_map().size() == 79200) {
+    
+    if (parsed.to_pairs().size() == 79200) {
         return 0;
     }
 

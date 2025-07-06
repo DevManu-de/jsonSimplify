@@ -1,15 +1,15 @@
 #include "json_simplify.hpp"
 
-json_simplify::json::json(const std::string json) : jsn(json_simplify::json_simplify(json)), free_jsn(true) {
-
+json_simplify::json::json(const std::string json)
+    : jsn(json_simplify::json_simplify(json)), free_jsn(true) {
 }
 
 json_simplify::json::json(json_element *jsn) : jsn(jsn), free_jsn(false) {
 
 }
 
-json_simplify::json::json(const std::string value, const bool quoted) : jsn(new json_value(value, quoted)), free_jsn(false) {
-
+json_simplify::json::json(const std::string value, const bool quoted)
+    : jsn(new json_value(value, quoted)), free_jsn(true) {
 }
 
 json_simplify::json::json(const JSON_SIMPLIFY_DEFAULT_ARRAY vec, const bool root) : jsn(new json_array()), free_jsn(root) {
@@ -33,23 +33,42 @@ std::string json_simplify::json::at() const {
     }
     return this->jsn->at();
 }
+
 json_simplify::json json_simplify::json::at(std::string value) const {
     if (this->jsn == nullptr) {
         throw json_simplify::json_unsupported_function("jsn = nullptr");
     }
     return this->jsn->at(value);
 }
+
 json_simplify::json json_simplify::json::at(u_int64_t index) const {
     if (this->jsn == nullptr) {
         throw json_simplify::json_unsupported_function("jsn = nullptr");
     }
     return this->jsn->at(index);
 }
-std::map<std::string, std::string> json_simplify::json::to_map() const {
+
+json_simplify::json json_simplify::json::operator[] (std::string value) const {
+    return this->at(value);
+}
+
+std::vector<json_simplify::json> json_simplify::json::to_vector() const {
+    return this->jsn->to_vector();
+}
+
+std::map<std::string, json_simplify::json> json_simplify::json::to_map() const {
+    return this->jsn->to_map();
+}
+
+json_simplify::json json_simplify::json::operator[] (u_int64_t index) const {
+    return this->at(index);
+}
+
+std::map<std::string, std::string> json_simplify::json::to_pairs() const {
     if (this->jsn == nullptr) {
         throw json_simplify::json_unsupported_function("jsn = nullptr");
     }
-    return this->jsn->to_map();
+    return this->jsn->to_pairs();
 }
 
 bool json_simplify::json::is_key_truth() const {
@@ -63,14 +82,26 @@ std::string json_simplify::json::to_string(bool prettify) const noexcept {
     return this->jsn->to_string(prettify);
 }
 
-json_simplify::json &json_simplify::json::add(json jsn) {
+json_simplify::json &json_simplify::json::add(json &jsn) {
     this->jsn->add(jsn.jsn);
+    jsn.root() = false;
+    jsn.jsn = nullptr;
     return *this;
 }
 
-json_simplify::json &json_simplify::json::add(const std::string key, json jsn) {
+json_simplify::json &json_simplify::json::add(json &&jsn) {
+    return this->add(jsn);
+}
+
+json_simplify::json &json_simplify::json::add(const std::string key, json &jsn) {
     this->jsn->add(key, jsn.jsn);
+    jsn.root() = false;
+    jsn.jsn = nullptr;
     return *this;
+}
+
+json_simplify::json &json_simplify::json::add(const std::string key, json &&jsn) {
+    return this->add(key, jsn);
 }
 
 bool &json_simplify::json::root() noexcept {

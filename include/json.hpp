@@ -23,9 +23,9 @@ private:
 
     json(json_element *jsn);
 
-    friend json_value;
-    friend json_object;
-    friend json_array;
+    friend class json_value;
+    friend class json_object;
+    friend class json_array;
 
     friend json_object *json_simplify_object(const std::string &, u_int64_t &);
     friend json_array *json_simplify_array(const std::string &, u_int64_t &);
@@ -41,11 +41,17 @@ public:
     std::string at() const;
     json at(std::string) const;
     json at(u_int64_t) const;
-    std::map<std::string, std::string> to_map() const;
+    json operator[] (std::string) const;
+    json operator[] (u_int64_t) const;
+    std::vector<json> to_vector() const;
+    std::map<std::string, json> to_map() const;
+    std::map<std::string, std::string> to_pairs() const;
     bool is_key_truth() const;
     std::string to_string(bool prettify = false) const noexcept;
-    json_simplify::json &add(const json jsn);
-    json_simplify::json &add(const std::string key, const json jsn);
+    json_simplify::json &add(json &jsn);
+    json_simplify::json &add(json &&jsn);
+    json_simplify::json &add(const std::string key, json &jsn);
+    json_simplify::json &add(const std::string key, json &&jsn);
 
     bool &root() noexcept;
     enum json_element_type get_type() const noexcept;

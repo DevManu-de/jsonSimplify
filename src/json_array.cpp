@@ -16,12 +16,24 @@ const json_simplify::json json_simplify::json_array::at(std::string key) const {
 const json_simplify::json json_simplify::json_array::at(u_int64_t index) const {
     return this->list.at(index);
 }
-std::map<std::string, std::string> json_simplify::json_array::to_map() const noexcept {
-    std::map<std::string, std::string> map {};
+
+std::vector<json_simplify::json> json_simplify::json_array::to_vector() const {
+    std::vector<json> vec{};
+    for (json_element *elem : this->get_list()) {
+        vec.push_back(json(elem));
+    }
+    return vec;
+}
+
+std::map<std::string, json_simplify::json> json_simplify::json_array::to_map() const {
+    throw generate_unsupported_function("to_map", "json_array");
+}
+std::map<std::string, std::string> json_simplify::json_array::to_pairs() const noexcept {
+    std::map<std::string, std::string> map{};
 
     u_int64_t index {0};
     for (const auto &v : this->get_list()) {
-        for (const auto &[k, v2] : v->to_map()) {
+        for (const auto &[k, v2] : v->to_pairs()) {
             map.insert({std::to_string(index) + (v->is_key_truth() ? "." : "") + k, v2});
         }
         ++index;
